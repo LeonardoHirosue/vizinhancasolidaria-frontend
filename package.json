@@ -1,5 +1,5 @@
 {
-  "name": "vigiacoletiva",
+  "name": "vizinhancasolidaria-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,14 +9,32 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/core": "0.8.0",
+    "@chakra-ui/react": "^2.6.1",
+    "@emotion/react": "11.10.8",
+    "@emotion/styled": "11.10.8",
+    "@hookform/resolvers": "^3.1.0",
     "@types/node": "18.16.3",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
-    "eslint": "8.39.0",
-    "eslint-config-next": "13.3.4",
+    "apexcharts": "3.40.0",
+    "axios": "0.27.2",
+    "dependencies": "^0.0.1",
+    "framer-motion": "10.12.6",
+    "jwt-decode": "^3.1.2",
+    "miragejs": "^0.1.47",
     "next": "13.3.4",
+    "nookies": "^2.5.2",
     "react": "18.2.0",
+    "react-apexcharts": "1.4.0",
     "react-dom": "18.2.0",
-    "typescript": "5.0.4"
+    "react-hook-form": "^7.43.9",
+    "react-icons": "4.8.0",
+    "react-query": "^3.39.3",
+    "typescript": "5.0.4",
+    "yup": "^1.1.1"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0"
   }
 }
