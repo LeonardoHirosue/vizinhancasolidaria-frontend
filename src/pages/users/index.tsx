@@ -1,145 +1,176 @@
-import NextLink from "next/link";
 import {
   Box,
   Button,
-  Checkbox,
+  Divider,
   Flex,
   Heading,
-  Icon,
+  Link,
   Table,
+  TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
-  Text,
-  useBreakpointValue,
-  Spinner,
-  Link
+  useDisclosure,
 } from "@chakra-ui/react";
-import { RiAddLine } from "react-icons/ri";
-
 import { Header } from "../../components/Header";
 import { Sidebar } from "../../components/Sidebar";
 import { Pagination } from "../../components/Pagination";
-import { getUsers, useUsers } from "../../../services/hooks/useUsers";
-import { useState } from "react";
-import { queryClient } from "../../../services/queryClient";
+import { useEffect, useState } from "react";
+import { SearchBox } from "../../components/Header/SearchBox";
 import { api } from "../../../services/apiClient";
-import { GetServerSideProps } from "next";
+import { withSSRAuth } from "../../utils/withSSRAuth";
+import { setupAPIClient } from "../../../services/api";
+import { UserInfo } from "../../components/UserInfo";
 
-export default function UserList({ users }) {
+type User = {
+  id: string;
+  role: string;
+  name: string;
+  email: string;
+  birth_date: Date;
+  cellphone: string;
+  rg: string;
+  cpf: string;
+  desired_role: string;
+  avatar: string;
+  residence: Residence
+}
+
+type Residence = {
+  number: string;
+  street: Street
+}
+
+type Street = {
+  name: string;
+  district: string;
+  postal_code: string;
+  state: string;
+  city: string
+}
+
+export default function Users() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentPageData, setCurrentPageData] = useState([]);
   const [page, setPage] = useState(1);
-  const { data, isLoading, isFetching, error } = useUsers(page, {
-    initialData: users,
-  });
   
-  const isWideVersion = useBreakpointValue({
-    base: false,
-    lg: true,
-  });
-
-  async function handlePrefetchUser(userId: string) {
-    await queryClient.prefetchQuery(['user', userId], async () => {
-      const response = await api.get(`users/${userId}`);
-
-      return response.data;
-    }, {
-      staleTime: 1000 * 60 * 10,
-    })
+  const {
+    onOpen: onOpenUserInfo,
+    isOpen: isOpenUserInfo,
+    onClose: onCloseUserInfo,
+  } = useDisclosure();
+  
+  async function loadUsers(){
+    const response = await api.get("/users")
+    const allUsers = response.data
+    setCurrentPageData(allUsers.slice((page - 1) * 10, page * 10));
+    setUsers(allUsers)
   }
 
-  return (
-    <Box>
-      <Header />
+  useEffect(() => {
+    loadUsers()
+  },[page]);
 
+
+  return (
+    <Flex direction="column" h="100vh">
+      <Header />
       <Flex w="100%" my="6" maxW={1480} mx="auto" px="6">
         <Sidebar />
 
-        <Box flex="1" borderRadius={8} bg="gray.800" p={["6", "8"]}>
+        <Box flex="1" borderRadius={8} bg="gray.800" p={["6", "8"]} mb={6}>
           <Flex mb="8" justify="space-between" align="center">
             <Heading size="lg" fontWeight="normal">
-              Usuários
-              { !isLoading && isFetching && <Spinner size="sm" color="gray.500" ml="4"/>}
+              Lista de Usuários
             </Heading>
-
-            <NextLink href="/users/create" passHref>
-              <Button
-                as="a"
-                size="sm"
-                fontSize="sm"
-                colorScheme="red"
-                leftIcon={<Icon as={RiAddLine} fontSize="20" />}
-              >
-                { isWideVersion ? "Novo usuário" : "Novo" }
-              </Button>
-            </NextLink>
+            <SearchBox
+              placeholderText="Buscar usuários"
+              placeholderBG="gray.700"
+            />
           </Flex>
-
-          { isLoading ? (
-            <Flex justify="center">
-              <Spinner/>
-            </Flex>
-          ) : error ? (
-            <Flex justify="center">
-              <Text>Falha ao obter dados dos usuários</Text>
-            </Flex>
-          ) : (
-            <>
-              <Table colorScheme="whiteAlpha">
+          <Divider my="4" borderColor="gray.700" />
+          <TableContainer pb={4}>
+            <Table size="sm" colorScheme="gray">
               <Thead>
-                <Tr>
-                  <Th px={["2", "4", "6"]} color="gray.300" width="8">
-                    <Checkbox colorScheme="red" />
+                <Tr justifyItems="space-between">
+                  <Th borderColor="gray.600" width="100px">
+                    Função
                   </Th>
-                  <Th>Usuário</Th>
-                  {isWideVersion && <Th>Data de Cadastro</Th>}
-                  {isWideVersion && <Th w="8"></Th>}
+                  <Th borderColor="gray.600">Usuário</Th>
+                  <Th borderColor="gray.600">Endereço</Th>
+                  <Th borderColor="gray.600" width="200px"></Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {data.users.map(user => {
+                {currentPageData.map((user) => {
                   return (
-                    <Tr key={user.id}>
-                      <Td px={["2", "4", "6"]}>
-                        <Checkbox colorScheme="red" />
+                    <Tr justifyItems="space-between" key={user.id}>
+                      <Td borderColor="gray.600" width="100px">
+                        {user.role}
                       </Td>
-                      <Td>
+                      <Td borderColor="gray.600">
                         <Box>
-                          <Link color="red.400" onMouseEnter={() => handlePrefetchUser(user.id)}>
+                          <Link
+                            color="red.400"
+                            onClick={onOpenUserInfo}
+                          >
                             <Text fontWeight="bold">{user.name}</Text>
                           </Link>
+                          
+                          <UserInfo
+                            isOpen={isOpenUserInfo}
+                            onClose={onCloseUserInfo}
+                            user_id={user.id} 
+                            onResidenceUpdate={undefined}                          />
                           <Text fontSize="sm" color="gray.300">
                             {user.email}
                           </Text>
                         </Box>
                       </Td>
-                      {isWideVersion && <Td>{user.createdAt}</Td>}
+                      <Td borderColor="gray.600">{`${user.residence.street.name}, ${user.residence.number} - Bairro ${user.residence.street.district}. ${user.residence.street.city} - ${user.residence.street.state}`}</Td>
+                      <Td borderColor="gray.600" width="200px" isNumeric>
+                        <Button
+                          size="xs"
+                          fontSize="sm"
+                          fontWeight="normal"
+                          colorScheme="gray"
+                          variant="solid"
+                          bg="gray.600"
+                          color="gray.900"
+                          w="135px"
+                        >
+                          Remover Usuário
+                        </Button>
+                      </Td>
                     </Tr>
-                  )
+                  );
                 })}
               </Tbody>
             </Table>
+          </TableContainer>
 
-            <Pagination 
-              totalCountOfRegisters={data.totalCount}
-              currentPage={page}
-              onPageChange={setPage}
-            />
-          </>
-          )}
+          <Pagination
+            totalCountOfRegisters={users.length}
+            currentPage={page}
+            onPageChange={setPage}
+          />
         </Box>
       </Flex>
-    </Box>
+    </Flex>
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const { users, totalCount} = await getUsers(1)
-
+export const getServerSideProps = withSSRAuth(async (ctx) => {
+  const apiClient = setupAPIClient(ctx);
+  await apiClient.get("/me");
+  
   return {
-    props: {
-      users,
-    }
+    props:{}
   }
-}
+}, {
+  permissions:[],
+  roles:["Tutor(a)", "Administrador(a)"]
+})

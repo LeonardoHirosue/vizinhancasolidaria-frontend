@@ -9,7 +9,8 @@ interface PaginationItemProps {
 export function PaginationItem({
   number,
   isCurrent = false,
-  onPageChange
+  onPageChange,
+  // loadData
 }: PaginationItemProps) {
   if (isCurrent) {
     return (
@@ -38,7 +39,10 @@ export function PaginationItem({
       _hover={{
         bg: "gray.500",
       }}
-      onClick={() => onPageChange(number)}
+      onClick={() => {
+        onPageChange(number)
+        // loadData()
+      }}
     >
       {number}
     </Button>

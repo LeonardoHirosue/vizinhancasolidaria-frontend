@@ -14,18 +14,21 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { RiSaveLine } from "react-icons/ri";
 import Link from "next/link";
-import { useMutation } from "react-query"
 
-import { Header } from "../../components/Header";
-import { Sidebar } from "../../components/Sidebar";
 import { Input } from "../../components/Form/Input";
 import { api } from "../../../services/apiClient";
-import { queryClient } from "../../../services/queryClient";
 import { useRouter } from "next/router";
+import { withSSRGuest } from "../../utils/withSSRGuest";
+import { Logo } from "../../components/Header/Logo";
+
 
 type CreateUserFormData = {
   name: string;
   email: string;
+  bith_date: string;
+  cell: string;
+  rg: string;
+  cpf: string;
   password: string;
   password_confirmation: string;
 }
@@ -33,6 +36,10 @@ type CreateUserFormData = {
 const createUserFormSchema = yup.object().shape({
   name: yup.string().required("Nome obrigatório"),
   email: yup.string().required("E-mail obrigatório").email("E-mail inválido"),
+  birth_date: yup.string().required("Data de nascimento obrigatório"),
+  cell: yup.string().required("Número de celular obrigatório"),
+  rg: yup.string().required("Número de RG obrigatório"),
+  cpf: yup.string().required("Número de CPF obrigatório"),
   password: yup.string().required("Senha obrigatória").min(6, "No mínimo 6 caracteres"),
   password_confirmation: yup.string().oneOf([
     null, yup.ref("password")
@@ -42,39 +49,37 @@ const createUserFormSchema = yup.object().shape({
 export default function CreateUser() {
   const router = useRouter();
 
-  const createUser = useMutation(async (user: CreateUserFormData) => {
-    const response = await api.post('users', {
-      user: {
-        ...user,
-        created_at: new Date(),
-      }
-    });
-
-    return response.data.user;
-  }, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('users')
-    }
-  })
-
   const { register, handleSubmit, formState } = useForm ({
     resolver: yupResolver(createUserFormSchema)
   });
 
   const { errors } = formState;
 
-  const handleCreateUser: SubmitHandler<CreateUserFormData> = async (values) => {
-    await createUser.mutateAsync(values);
+  const handleCreateUser: SubmitHandler<CreateUserFormData> = async (values: CreateUserFormData) => {
+    const response = await api.post('users', values);
 
-    router.push('/users');
+    router.push('/');
   }
  
   return (
     <Box>
-      <Header />
+      <Flex
+      as="header"
+      w="100%"
+      maxWidth={1480}
+      h="20"
+      mx="auto"
+      mt="4"
+      px="6"
+      align="center"
+    >
+      
+      <Logo showExtendedLogo={true}/>
+
+    </Flex>
 
       <Flex w="100%" my="6" maxW={1480} mx="auto" px="6">
-        <Sidebar />
+        {/* <Sidebar /> */}
 
         <Box 
           as="form" 
@@ -84,7 +89,7 @@ export default function CreateUser() {
           onSubmit={handleSubmit(handleCreateUser)}
         >
           <Heading size="lg" fontWeight="normal">
-            Criar Usuário
+            Cadastro de Usuário
           </Heading>
 
           <Divider my="6" borderColor="gray.700" />
@@ -93,16 +98,46 @@ export default function CreateUser() {
             <SimpleGrid minChildWidth="240px" spacing={["6", "8"]} w="100%">
               <Input 
                 name="name"
-                error={errors.name} 
+                errors={errors.name} 
                 label="Nome completo"
                 {...register("name")} 
               />
               <Input 
                 name="email" 
                 type="email"
-                error={errors.email}
+                errors={errors.email}
                 label="E-mail"
                 {...register("email")}  
+              />
+            </SimpleGrid>
+
+            <SimpleGrid minChildWidth="240px" spacing={["6", "8"]} w="100%">
+            <Input 
+                name="birth_date"
+                errors={errors.birth_date} 
+                label="Data de Nascimento"
+                {...register("birth_date")} 
+              />
+              <Input 
+                name="cell" 
+                errors={errors.cell}
+                label="Celular"
+                {...register("cell")}  
+              />
+            </SimpleGrid>
+
+            <SimpleGrid minChildWidth="240px" spacing={["6", "8"]} w="100%">
+            <Input 
+                name="rg"
+                errors={errors.rg} 
+                label="RG"
+                {...register("rg")} 
+              />
+              <Input 
+                name="cpf" 
+                errors={errors.cpf}
+                label="CPF"
+                {...register("cpf")}  
               />
             </SimpleGrid>
 
@@ -110,14 +145,14 @@ export default function CreateUser() {
               <Input 
                 name="password" 
                 type="password"
-                error={errors.password}
+                errors={errors.password}
                 label="Senha"
                 {...register("password")} 
               />
               <Input
                 name="password_confirmation"
                 type="password"
-                error={errors.password_confirmation}
+                errors={errors.password_confirmation}
                 label="Confirmação da senha"
                 {...register("password_confirmation")} 
               />
@@ -126,7 +161,7 @@ export default function CreateUser() {
 
           <Flex mt="8" justify="flex-end">
             <HStack spacing="4">
-              <Link href="/users" passHref>
+              <Link href="/" passHref>
                   <Button colorScheme="whiteAlpha">Cancelar</Button>
               </Link>
               <Button
@@ -147,3 +182,9 @@ export default function CreateUser() {
     </Box>
   );
 }
+
+export const getServerSideProps = withSSRGuest(async (ctx) => {
+  return {
+    props: {}
+  }
+});

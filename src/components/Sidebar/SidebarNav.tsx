@@ -1,39 +1,80 @@
 import { Stack } from "@chakra-ui/react";
-import { RiAlarmWarningFill, RiAlarmWarningLine, RiAlertFill, RiAlertLine, RiCarLine, RiContactsLine, RiDashboardLine, RiFileUserLine, RiHome2Line, RiHomeGearLine, RiMapPinLine, RiNewspaperLine, RiTeamLine, RiUserLocationLine } from 'react-icons/ri'
-import { MdFamilyRestroom, MdOutlineNotificationAdd, MdPets } from 'react-icons/md'
 import { NavLink } from "./NavLink";
 import { NavSection } from "./NavSection";
+import {
+  AiOutlineRead,
+  AiOutlineUser,
+  AiOutlineSound,
+  AiOutlineHome,
+  AiOutlineMail,
+  AiOutlineAudit,
+  AiOutlineSafety,
+  AiOutlineEnvironment,
+  AiOutlineInfoCircle,
+} from "react-icons/ai";
+import { Can } from "../Can";
+import { withSSRAuth } from "../../utils/withSSRAuth";
+import { setupAPIClient } from "../../../services/api";
 
 export function SidebarNav() {
-    return (
-        <Stack spacing='10' align='flex-start' mb='10'>
-            <NavSection title='GERAL'>
-                <NavLink icon={RiDashboardLine} href="/dashboard">Dashboard</NavLink>
-                <NavLink icon={RiNewspaperLine} href="/forms">Informativos</NavLink>
-                <NavLink icon={RiFileUserLine} href="/profile">Meus Dados</NavLink>
-            </NavSection>
-            <NavSection title='NOTIFICAÇÕES'>
-                <NavLink icon={RiAlarmWarningLine} href="/my_notifications">Meus Alertas</NavLink>
-                <NavLink icon={RiAlarmWarningFill} href="/notifications">Alertas Gerais</NavLink>
-            </NavSection>
-            <NavSection title='RESIDÊNCIA'>
-                <NavLink icon={RiHome2Line} href="/my_residence">Minha residência</NavLink>
-                <NavLink icon={MdFamilyRestroom} href="/my_family">Minha Família</NavLink>
-                <NavLink icon={RiCarLine} href="/my_cars">Meus veículos</NavLink>
-                <NavLink icon={MdPets} href="/my_pets">Meus PETs</NavLink>
-            </NavSection>
-            <NavSection title="TUTOR">
-                <NavLink icon={RiAlertLine} href="/new_notifications">Novas Notificações</NavLink>
-                <NavLink icon={MdOutlineNotificationAdd} href="/new_solicitation">Novas Solicitações</NavLink>
-                <NavLink icon={RiContactsLine} href="/users">Usuários</NavLink>
-                <NavLink icon={RiHomeGearLine} href="/residences">Residências</NavLink>
-            </NavSection>
-            <NavSection title="ADMIN">
-                <NavLink icon={RiUserLocationLine} href="/tutors">Tutores</NavLink>
-                <NavLink icon={RiTeamLine} href="/groups">Grupos</NavLink>
-                <NavLink icon={RiMapPinLine} href="/streets">Gerenciar Ruas</NavLink>
-                <NavLink icon={RiAlertFill} href="/notifications_type">Tipos de Notificações</NavLink>
-            </NavSection>
-        </Stack>
-    );
+  return (
+    <Stack spacing="10" align="flex-start" mb="10">
+      <NavSection title="GERAL">
+        <Can roles={["Morador(a)", "Anfitriã(o)", "Tutor(a)", "Administrador(a)"]}>
+          <NavLink icon={AiOutlineRead} href="/informativos">
+            Informativos
+          </NavLink>
+        </Can>
+        <NavLink icon={AiOutlineUser} href="/perfil">
+          Meus Dados
+        </NavLink>
+        <Can roles={["Morador(a)", "Anfitriã(o)", "Tutor(a)", "Administrador(a)"]}>
+          <NavLink icon={AiOutlineSound} href="/alertas">
+            Alertas
+          </NavLink>
+          <NavLink icon={AiOutlineHome} href="/minha_residencia">
+            Minha Residência
+          </NavLink>
+        </Can>
+      </NavSection>
+      <Can roles={["Tutor(a)", "Administrador(a)"]}>
+        <NavSection title="TUTOR">
+          <NavLink icon={AiOutlineMail} href="/novas_solicitacoes">
+            Novas Solicitações
+          </NavLink>
+          <NavLink icon={AiOutlineAudit} href="/users">
+            Usuários
+          </NavLink>
+        </NavSection>
+      </Can>
+      <Can roles={["Administrador(a)"]}>
+        <NavSection title="ADMIN">
+          <NavLink icon={AiOutlineSafety} href="/tutores">
+            Tutores
+          </NavLink>
+          <NavLink icon={AiOutlineEnvironment} href="/ruas">
+            Gerenciar Ruas
+          </NavLink>
+          <NavLink icon={AiOutlineInfoCircle} href="/alerta_tipos">
+            Tipos de Alertas
+          </NavLink>
+        </NavSection>
+      </Can>
+    </Stack>
+  );
 }
+
+export const getServerSideProps = withSSRAuth(
+  async (ctx) => {
+    const apiClient = setupAPIClient(ctx);
+    await apiClient.get("/me");
+
+    return {
+      props: {},
+    };
+  },
+  {
+    permissions: [],
+    roles: [],
+  }
+);

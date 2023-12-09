@@ -1,4 +1,4 @@
-import { Flex, Button, Stack, Text, Image, VStack } from "@chakra-ui/react";
+import { Flex, Button, Stack, Text, Image, VStack, Link, useDisclosure } from "@chakra-ui/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { Input } from "../components/Form/Input";
@@ -6,6 +6,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { withSSRGuest } from "../utils/withSSRGuest";
+import Router from "next/router";
+import { PasswordRecovery } from "../components/PasswordRecovery";
 
 type SignInFormData = {
   email: string;
@@ -18,6 +20,7 @@ const signInFormSchema = yup.object({
 });
 
 export default function SignIn() {
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const { register, handleSubmit, formState } = useForm({
     resolver: yupResolver(signInFormSchema)
   });
@@ -63,32 +66,42 @@ export default function SignIn() {
         flexDir="column"
         onSubmit={handleSubmit(handleSignIn)}
       >
-        <Stack spacing="4">
-          <Input 
+        <Stack spacing={3} >
+          <Input
+            size="md"  
             name="email" 
             type="email" 
             label="E-mail" 
-            error={errors.email}
+            errors={errors.email}
             {...register("email")} 
           />
-          <Input name="password" 
+          <Input
+            size="md" 
+            name="password" 
             type="password" 
             label="Senha"
-            error={errors.password} 
+            errors={errors.password} 
             {...register("password")} 
           />
         </Stack>
+        <Button variant="link" mt="3" colorScheme="gray" size="md" fontWeight="normal" onClick={onOpen}>
+          Clique aqui para recuperar sua senha.
+        </Button>
+        <PasswordRecovery isOpen={isOpen} onClose={onClose}/>
 
-        <Button type="submit" mt="6" colorScheme="red" size="lg" isLoading={formState.isSubmitting}>
+        <Button type="submit" mt="5" colorScheme="red" size="md" isLoading={formState.isSubmitting}>
           Entrar
+        </Button>
+        <Button variant="link" mt="4" colorScheme="gray"size="md" onClick={() => { Router.push("/cadastro") }}>
+          Cadastrar-se
         </Button>
       </Flex>
     </VStack>
   );
 }
 
-export const getServerSideProps = withSSRGuest(async (ctx) => {
-  return {
-    props: {}
-  }
-});
+// export const getServerSideProps = withSSRGuest(async (ctx) => {
+//   return {
+//     props: {}
+//   }
+// });

@@ -38,7 +38,7 @@ export function makeServer() {
     },
 
     seeds(server) {
-      server.createList("user", 9);
+      server.createList("user", 50);
     },
 
     routes() {
@@ -59,8 +59,8 @@ export function makeServer() {
               new Date(b.created_at).getTime() -
               new Date(a.created_at).getTime()
           )
-          .slice(pageStart, pageEnd);
-
+          .slice(pageStart, pageEnd);    
+        
         return new Response(200, { "x-total-count": String(total) }, { users });
       });
 

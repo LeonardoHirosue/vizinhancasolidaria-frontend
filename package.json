@@ -21,8 +21,10 @@
     "axios": "0.27.2",
     "dependencies": "^0.0.1",
     "framer-motion": "10.12.6",
+    "gerador-validador-cpf": "^5.0.2",
     "jwt-decode": "^3.1.2",
     "miragejs": "^0.1.47",
+    "moment": "^2.29.4",
     "next": "13.3.4",
     "nookies": "^2.5.2",
     "react": "18.2.0",
@@ -30,6 +32,7 @@
     "react-dom": "18.2.0",
     "react-hook-form": "^7.43.9",
     "react-icons": "4.8.0",
+    "react-input-mask": "^2.0.4",
     "react-query": "^3.39.3",
     "typescript": "5.0.4",
     "yup": "^1.1.1"

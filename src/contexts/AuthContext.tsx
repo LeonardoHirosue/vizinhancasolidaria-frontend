@@ -5,9 +5,11 @@ import Router from "next/router";
 import { api } from "../../services/apiClient";
 
 type User = {
+  name: string;
   email: string;
   permissions: string[];
   roles: string[];
+  avatar: string;
 };
 
 type SignInCredentials = {
@@ -34,7 +36,7 @@ export function signOut() {
   destroyCookie(undefined, 'vizinhancasolidaria.token');
   destroyCookie(undefined, 'vizinhancasolidaria.refreshToken');
 
-  authChannel.postMessage('signOut');
+  // authChannel.postMessage('signOut');
 
   Router.push('/');
 }
@@ -63,9 +65,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (token) {
       api.get("/me")
         .then((response) => {
-          const { email, permissions, roles } = response.data;
+          const { name, email, permissions, roles, avatar } = response.data;
 
-          setUser({ email, permissions, roles });
+          setUser({ name, email, permissions, roles, avatar });
         })
         .catch(() => {
           signOut();
@@ -75,12 +77,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function signIn({ email, password }: SignInCredentials) {
     try {
-      const response = await api.post("sessions", {
+      const response = await api.post("/sessions", {
         email,
         password,
       });
-
-      const { token, refreshToken, permissions, roles } = response.data;
+      
+      const { user, token, refreshToken, permissions, roles } = response.data;
 
       setCookie(undefined, 'vizinhancasolidaria.token', token, {
         maxAge: 60 * 60 * 24 * 30,
@@ -92,16 +94,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       setUser({
+        name: user.name,
         email,
         permissions,
         roles,
+        avatar: user.avatar
       });
 
       api.defaults.headers["Authorization"] = `Bearer ${token}`;
 
-      Router.push("/dashboard");
+      Router.push("/informativos");
     } catch (err) {
-      console.log(err);
+      console.log(err.response.data.message);
     }
   }
   return (

@@ -22,7 +22,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <Component {...pageProps} />
           </SidebarDrawerProvider>
         </ChakraProvider>
-        <ReactQueryDevtools/>
+        {/* <ReactQueryDevtools/> */}
       </AuthProvider>
     </QueryClientProvider>
   )

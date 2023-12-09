@@ -1,29 +1,47 @@
-import { Avatar, Box, Button, Flex, Icon, Text } from "@chakra-ui/react";
+import { Avatar, Box, Button, Flex, Icon, Spinner, Text } from "@chakra-ui/react";
 import { RiLogoutBoxRLine } from "react-icons/ri";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
+import { api } from "../../../services/apiClient";
 
 interface ProfileProps {
   showProfileData?: boolean;
 }
 
-export function Profile({ showProfileData = true }: ProfileProps) {
-  const { signOut } = useContext(AuthContext);
+type currentUser = {
+  name: string;
+  email: string;
+  avatar: string;
+};
 
+export function Profile({ showProfileData = true }: ProfileProps) {
+  const { signOut, user } = useContext(AuthContext);
+  const [currentUser, setCurrentUser] = useState<currentUser>()
+
+  async function loadUserInfo(){
+    const { data } = await api.get("/users")
+    const userInfo = data.find((data) => data.email == user?.email);
+    setCurrentUser(userInfo)
+  }
+
+  useEffect(() => {
+    loadUserInfo()
+  },[]);
+  
   return (
     <Flex align="center">
       {showProfileData && (
         <Box mr="4" textAlign="right">
-          <Text>Leonardo Hirosue</Text>
+          <Text>{currentUser ? currentUser.name : ""}</Text>
           <Text color="gray.300" fontSize="small">
-            leonardo.hirosue@gmail.com
+            {currentUser ? currentUser.email : ""}
           </Text>
         </Box>
       )}
       <Avatar
         size="md"
-        name="Leonardo Hirosue"
-        src="https://media.licdn.com/dms/image/D4D03AQGyt3komLI1Fg/profile-displayphoto-shrink_800_800/0/1669039365692?e=1688601600&v=beta&t=2_NSzEdwI8hfYI7_w8K_rwovXbSe6dalLR8uHGFc_qM"
+        name={currentUser ? currentUser.name : ""}
+        src={currentUser ? `${currentUser.avatar}` : ""}
       />
       <Button variant="link" mx="4" onClick={signOut}>
         <Icon as={RiLogoutBoxRLine} fontSize="20" mr="2"/>

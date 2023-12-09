@@ -5,7 +5,7 @@ import { RiSearchLine } from "react-icons/ri";
 //Controlled components
 //Uncontrolled components
 
-export function SearchBox() {
+export function SearchBox({ placeholderText,  placeholderBG, ...props }) {
   // const [ search, setSearch ] = useState('');
 
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -21,19 +21,20 @@ export function SearchBox() {
       py="4"
       px="8"
       ml="6"
-      maxWidth={400}
+      maxWidth={350}
+      maxHeight={50}
       alignSelf="center"
       color="gray.200"
       position="relative"
-      bg="gray.800"
+      bg={placeholderBG}
       borderRadius="full"
     >
       <Input
         color="gray.50"
         variant="unstyled"
-        px="4"
-        mr="4"
-        placeholder="Buscar na plataforma"
+        px="2"
+        mr="2"
+        placeholder={placeholderText}
         _placeholder={{ color: "gray.400" }}
         ref={searchInputRef}
       />

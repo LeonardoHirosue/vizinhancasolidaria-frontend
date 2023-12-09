@@ -14,6 +14,7 @@ export function setupAPIClient(ctx = undefined) {
     headers: {
       Authorization: `Bearer ${cookies["vizinhancasolidaria.token"]}`,
     },
+    data: FormData
   });
 
   api.interceptors.response.use(
@@ -22,7 +23,10 @@ export function setupAPIClient(ctx = undefined) {
     },
     (error: AxiosError) => {
       if (error.response.status === 401) {
-        if (error.response.data?.code === "token.expired") {
+        const messageResponse = error.response.data.message
+        console.log("messageResponse", messageResponse)
+
+        if (messageResponse == "Invalid token!" || messageResponse == "Token missing") {
           cookies = parseCookies(ctx);
 
           const { "vizinhancasolidaria.refreshToken": refreshToken } = cookies;

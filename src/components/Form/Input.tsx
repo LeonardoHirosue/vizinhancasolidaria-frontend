@@ -6,16 +6,18 @@ import {
   Input as ChakraInput,
   InputProps as ChakraInputProps,
   FormErrorMessage,
+  FormHelperText,
 } from "@chakra-ui/react";
 
 interface InputProps extends ChakraInputProps {
   name: string;
   label?: string;
   errors?: FieldError;
+  helper_text?: string;
 }
 
 const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
-  { name, label, errors = null, ...rest },
+  { name, label, errors = null, helper_text=null, ...rest },
   ref
 ) => {
   return (
@@ -35,8 +37,12 @@ const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
         ref={ref}
         {...rest}
       />
-
-      { !!errors && (
+      {!!helper_text && (
+        <FormHelperText>
+          {helper_text}
+        </FormHelperText>
+      )}
+      {!!errors && (
         <FormErrorMessage>
             {errors.message}
         </FormErrorMessage>

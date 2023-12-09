@@ -45,7 +45,7 @@ export function withSSRAuth<P>(
       if (!userHasValidPermissions) {
         return {
           redirect: {
-            destination: '/dashboard',
+            destination: '/perfil',
             permanent: false
           }
         }        
